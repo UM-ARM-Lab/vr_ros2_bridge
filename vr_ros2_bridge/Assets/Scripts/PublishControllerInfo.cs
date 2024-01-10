@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem.XR;
 using RosMessageTypes.VrRos2Bridge;
 using RosMessageTypes.Geometry;
+using static UnityEngine.XR.Interaction.Toolkit.Inputs.XRInputTrackingAggregator;
 
 /// <summary>
 ///
@@ -15,10 +16,6 @@ public class PublishControllerInfo : MonoBehaviour
 
     // Controller Input Devices - used to access button states.
     List<UnityEngine.XR.InputDevice> controllers = new List<UnityEngine.XR.InputDevice>();
-
-    // Controller Game Objects - used to access controller tracked poses.
-    public GameObject leftController;
-    public GameObject rightController;
 
     // Publish the cube's position and rotation every N seconds
     public float publishMessagePeriod = 0.03f;
@@ -33,6 +30,7 @@ public class PublishControllerInfo : MonoBehaviour
         ros = ROSConnection.GetOrCreateInstance();
         ros.RegisterPublisher<ControllersInfoMsg>(topicName, 10);
         ros.RegisterPublisher<PoseStampedMsg>("left_controller_pose", 10);
+        ros.RegisterPublisher<PoseStampedMsg>("right_controller_pose", 10);
     }
 
     private void Update()
@@ -50,61 +48,48 @@ public class PublishControllerInfo : MonoBehaviour
             foreach (var device in controllers)
             {
                 bool isLeftController = (device.characteristics & UnityEngine.XR.InputDeviceCharacteristics.Left) != UnityEngine.XR.InputDeviceCharacteristics.None;
-                // Debug.Log(string.Format("Device found with name '{0}' and role '{1}'.", device.name, device.role.ToString()));
-                var name = isLeftController ? "LeftController" : "RightController";
+                string controllerSide;
+                if (isLeftController)
+                {
+                    controllerSide = "Left";
+                }
+                else
+                {
+                    controllerSide = "Right";
+                }
+                string controllerObjectName = string.Format("{0} Controller Offset", controllerSide);
+                var controllerObject = GameObject.Find(controllerObjectName);
+
+                if (controllerObject == null)
+                {
+                    Debug.Log(string.Format("No such object {0}", controllerObjectName));
+                    continue;
+                }
 
                 var controllerInfoMsg = new ControllerInfoMsg();
                 controllerInfoMsg.controller_name = name;
 
-                // Get pose of the controller, based on whether its the left/right controller.
-                GameObject thisController = isLeftController ? leftController : rightController;
-                controllerInfoMsg.controller_pose.position.x = thisController.transform.position.x;
-                controllerInfoMsg.controller_pose.position.y = thisController.transform.position.z;
-                controllerInfoMsg.controller_pose.position.z = thisController.transform.position.y;
-                controllerInfoMsg.controller_pose.orientation.w = thisController.transform.rotation.w;
-                controllerInfoMsg.controller_pose.orientation.x = -thisController.transform.rotation.x;
-                controllerInfoMsg.controller_pose.orientation.y = -thisController.transform.rotation.z;
-                controllerInfoMsg.controller_pose.orientation.z = -thisController.transform.rotation.y;
+                // Get pose of the controller, and transform from a Y-up left-handed frame to a Z-up, X-forward, right handed frame
+                controllerInfoMsg.controller_pose.position.x = controllerObject.transform.position.x;
+                controllerInfoMsg.controller_pose.position.y = controllerObject.transform.position.z;
+                controllerInfoMsg.controller_pose.position.z = controllerObject.transform.position.y;
+                controllerInfoMsg.controller_pose.orientation.w = controllerObject.transform.rotation.w;
+                controllerInfoMsg.controller_pose.orientation.x = -controllerObject.transform.rotation.x;
+                controllerInfoMsg.controller_pose.orientation.y = -controllerObject.transform.rotation.z;
+                controllerInfoMsg.controller_pose.orientation.z = -controllerObject.transform.rotation.y;
 
-                if (isLeftController)
-                {
-                    PoseStampedMsg left_pose = new PoseStampedMsg();
-                    left_pose.header.frame_id = "world";
-                    left_pose.pose = controllerInfoMsg.controller_pose;
+                // For visualization in RViz
+                PoseStampedMsg pose_msg = new PoseStampedMsg();
+                pose_msg.header.frame_id = "world";
+                pose_msg.pose = controllerInfoMsg.controller_pose;
+                var pose_topic_name = string.Format("{0}_controller_pose", controllerSide).ToLower();
+                ros.Publish(pose_topic_name, pose_msg);
 
-                    // ros.Publish("left_controller_pose", left_pose);
-                }
-
-                // Get button press states.
-                bool triggerValue = false;
-                if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out triggerValue) && triggerValue)
-                {
-                    //Debug.Log(string.Format("{0}: Trigger button is pressed!", name));
-                }
-
-                float triggerAxisValue = (float)-1.0;
-                if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerAxisValue))
-                {
-                    //Debug.Log(string.Format("{0}: Trigger: {1}", name, triggerAxisValue.ToString()));
-                }
-
-                bool gripValue = false;
-                if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out gripValue) && gripValue)
-                {
-                    //Debug.Log(string.Format("{0}: Grip button is pressed!", name));
-                }
-
-                bool primary2DAxisClickValue = false;
-                if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out primary2DAxisClickValue) && primary2DAxisClickValue)
-                {
-                    //Debug.Log(string.Format("{0}: Trackpad button is pressed!", name));
-                }
-
-                // Populate controller button info.
-                controllerInfoMsg.trigger_button = triggerValue;
-                controllerInfoMsg.trigger_axis = triggerAxisValue;
-                controllerInfoMsg.grip_button = gripValue;
-                controllerInfoMsg.trackpad_button = primary2DAxisClickValue;
+                // Get button press states
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out controllerInfoMsg.trigger_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out controllerInfoMsg.trigger_axis);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out controllerInfoMsg.grip_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out controllerInfoMsg.trackpad_button);
 
                 // Add to list of controller info messages.
                 controllerInfoMsgs.Add(controllerInfoMsg);
@@ -112,7 +97,6 @@ public class PublishControllerInfo : MonoBehaviour
 
             // Populate controllers info msg.
             controllersInfoMsg.controllers_info = controllerInfoMsgs.ToArray();
-            // TODO: Add header info.
 
             // Finally send the message to server_endpoint.py running in ROS
             ros.Publish(topicName, controllersInfoMsg);

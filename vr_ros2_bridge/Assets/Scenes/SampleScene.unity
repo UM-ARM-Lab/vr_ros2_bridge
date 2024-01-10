@@ -983,7 +983,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1094246009}
   m_Layer: 0
-  m_Name: LeftModelParent
+  m_Name: Left Controller Offset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1014,7 +1014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1716259503}
   m_Layer: 0
-  m_Name: RightModelParent
+  m_Name: Right Controller Offset
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1313,8 +1313,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topicName: vr_controller_info
-  leftController: {fileID: 1094246008}
-  rightController: {fileID: 1716259502}
   publishMessagePeriod: 0.016
 --- !u!4 &1906405709
 Transform:
