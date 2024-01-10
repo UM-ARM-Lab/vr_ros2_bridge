@@ -24,7 +24,7 @@ public class PublishControllerInfo : MonoBehaviour
     public float publishMessagePeriod = 0.03f;
 
     // Used to determine how much time has elapsed since the last message was published
-    private float timeElapsed;
+    private float timeElapsed = 0;
 
 
     void Start()
@@ -59,12 +59,12 @@ public class PublishControllerInfo : MonoBehaviour
                 // Get pose of the controller, based on whether its the left/right controller.
                 GameObject thisController = isLeftController ? leftController : rightController;
                 controllerInfoMsg.controller_pose.position.x = thisController.transform.position.x;
-                controllerInfoMsg.controller_pose.position.y = thisController.transform.position.z; // Switch to z-up right hand.
+                controllerInfoMsg.controller_pose.position.y = thisController.transform.position.z;
                 controllerInfoMsg.controller_pose.position.z = thisController.transform.position.y;
                 controllerInfoMsg.controller_pose.orientation.w = thisController.transform.rotation.w;
-                controllerInfoMsg.controller_pose.orientation.x = thisController.transform.rotation.x;
-                controllerInfoMsg.controller_pose.orientation.y = thisController.transform.rotation.z; // Switch to z-up right hand.
-                controllerInfoMsg.controller_pose.orientation.z = thisController.transform.rotation.y;
+                controllerInfoMsg.controller_pose.orientation.x = -thisController.transform.rotation.x;
+                controllerInfoMsg.controller_pose.orientation.y = -thisController.transform.rotation.z;
+                controllerInfoMsg.controller_pose.orientation.z = -thisController.transform.rotation.y;
 
                 if (isLeftController)
                 {
@@ -72,7 +72,7 @@ public class PublishControllerInfo : MonoBehaviour
                     left_pose.header.frame_id = "world";
                     left_pose.pose = controllerInfoMsg.controller_pose;
 
-                    ros.Publish("left_controller_pose", left_pose);
+                    // ros.Publish("left_controller_pose", left_pose);
                 }
 
                 // Get button press states.
