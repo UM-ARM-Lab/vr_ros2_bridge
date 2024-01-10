@@ -1,0 +1,6 @@
+string controller_name
+geometry_msgs/Pose controller_pose
+bool trigger_button
+bool grip_button
+bool trackpad_button
+float32 trigger_axis
