@@ -3,9 +3,9 @@
 <package format="3">
   <name>vr_ros2_bridge_msgs</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="armlab@todo.todo">armlab</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Interface package for VR ROS 2 Bridge</description>
+  <maintainer email="markvd@umich.edu">Mark Van der Merwe</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
