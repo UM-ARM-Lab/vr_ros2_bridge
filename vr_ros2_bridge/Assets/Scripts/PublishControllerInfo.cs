@@ -1,10 +1,8 @@
 using UnityEngine;
 using Unity.Robotics.ROSTCPConnector;
 using System.Collections.Generic;
-using UnityEngine.InputSystem.XR;
 using RosMessageTypes.VrRos2Bridge;
 using RosMessageTypes.Geometry;
-using static UnityEngine.XR.Interaction.Toolkit.Inputs.XRInputTrackingAggregator;
 
 /// <summary>
 ///
@@ -13,6 +11,7 @@ public class PublishControllerInfo : MonoBehaviour
 {
     ROSConnection ros;
     public string topicName = "vr_controller_info";
+    public string frameName = "vr";
 
     // Controller Input Devices - used to access button states.
     List<UnityEngine.XR.InputDevice> controllers = new List<UnityEngine.XR.InputDevice>();
@@ -80,7 +79,7 @@ public class PublishControllerInfo : MonoBehaviour
 
                 // For visualization in RViz
                 PoseStampedMsg pose_msg = new PoseStampedMsg();
-                pose_msg.header.frame_id = "world";
+                pose_msg.header.frame_id = frameName;
                 pose_msg.pose = controllerInfoMsg.controller_pose;
                 var pose_topic_name = string.Format("{0}_controller_pose", controllerSide).ToLower();
                 ros.Publish(pose_topic_name, pose_msg);
