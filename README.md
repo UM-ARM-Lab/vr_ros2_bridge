@@ -15,9 +15,13 @@ git clone git@github.com:/UM-ARM-Lab/vr_ros2_bridge.git
 git clone git@github.com:Unity-Technologies/ROS-TCP-Endpoint.git -b main-ros2
 ```
 
-
 # How to run
 
- - In unity (on Windows), import and run ths `vr_ros2_bridge` project.
+ - In Unity (on Windows), import and run ths `vr_ros2_bridge` project.
+ - In Unity, go to the top menu and click "Robtics" > "ROS Settings" and make sure you have "ROS 2" selected, and the IP address of the Ubuntu machine you want to communicate with.
  - In Ubuntu, 
- - In Ubuntu, start the C# ROS 2 bridge. See [this guide](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/ros_unity_integration/setup.md) for details.
+ - In Ubuntu, start the C# ROS 2 bridge. See [this guide](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/ros_unity_integration/setup.md) for details. This essentially just requires running `ros2 run ros_tcp_endpoint default_server_endpoint --ros-args -p ROS_IP:=$ROS_IP`
+ - Hit the Play button in Unity. You need to either be wearing the hedest (not useful) or cover up the little sensor between the two eyes to trick it into thinking you're wearing it, otherwise the controllers won't work!
+
+At this point you should be able to open RViz (run `rviz2`) and see the controller poses by adding `Pose` display types. By default, the controller poses are published in a frame called `vr` so you need to set the Global Frame in RViz to `vr`. This frame name can be changed in Unity by clicking on the `ROSPublisher` game object in the left panel, then setting the `frame_name` string in the right panel.
+
