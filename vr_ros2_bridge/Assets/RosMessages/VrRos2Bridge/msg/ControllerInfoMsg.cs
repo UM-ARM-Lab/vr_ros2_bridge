@@ -15,6 +15,7 @@ namespace RosMessageTypes.VrRos2Bridge
 
         public string controller_name;
         public Geometry.PoseMsg controller_pose;
+        public Geometry.TwistMsg controller_velocity;
         public bool trigger_button;
         public bool grip_button;
         public bool trackpad_button;
@@ -24,16 +25,18 @@ namespace RosMessageTypes.VrRos2Bridge
         {
             this.controller_name = "";
             this.controller_pose = new Geometry.PoseMsg();
+            this.controller_velocity = new Geometry.TwistMsg();
             this.trigger_button = false;
             this.grip_button = false;
             this.trackpad_button = false;
             this.trigger_axis = 0.0f;
         }
 
-        public ControllerInfoMsg(string controller_name, Geometry.PoseMsg controller_pose, bool trigger_button, bool grip_button, bool trackpad_button, float trigger_axis)
+        public ControllerInfoMsg(string controller_name, Geometry.PoseMsg controller_pose, Geometry.TwistMsg controller_velocity, bool trigger_button, bool grip_button, bool trackpad_button, float trigger_axis)
         {
             this.controller_name = controller_name;
             this.controller_pose = controller_pose;
+            this.controller_velocity = controller_velocity;
             this.trigger_button = trigger_button;
             this.grip_button = grip_button;
             this.trackpad_button = trackpad_button;
@@ -46,6 +49,7 @@ namespace RosMessageTypes.VrRos2Bridge
         {
             deserializer.Read(out this.controller_name);
             this.controller_pose = Geometry.PoseMsg.Deserialize(deserializer);
+            this.controller_velocity = Geometry.TwistMsg.Deserialize(deserializer);
             deserializer.Read(out this.trigger_button);
             deserializer.Read(out this.grip_button);
             deserializer.Read(out this.trackpad_button);
@@ -56,6 +60,7 @@ namespace RosMessageTypes.VrRos2Bridge
         {
             serializer.Write(this.controller_name);
             serializer.Write(this.controller_pose);
+            serializer.Write(this.controller_velocity);
             serializer.Write(this.trigger_button);
             serializer.Write(this.grip_button);
             serializer.Write(this.trackpad_button);
@@ -67,6 +72,7 @@ namespace RosMessageTypes.VrRos2Bridge
             return "ControllerInfoMsg: " +
             "\ncontroller_name: " + controller_name.ToString() +
             "\ncontroller_pose: " + controller_pose.ToString() +
+            "\ncontroller_velocity: " + controller_velocity.ToString() +
             "\ntrigger_button: " + trigger_button.ToString() +
             "\ngrip_button: " + grip_button.ToString() +
             "\ntrackpad_button: " + trackpad_button.ToString() +

@@ -1,5 +1,6 @@
 string controller_name
 geometry_msgs/Pose controller_pose
+geometry_msgs/Twist controller_velocity
 bool trigger_button
 bool grip_button
 bool trackpad_button

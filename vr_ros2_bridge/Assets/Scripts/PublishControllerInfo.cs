@@ -3,6 +3,8 @@ using Unity.Robotics.ROSTCPConnector;
 using System.Collections.Generic;
 using RosMessageTypes.VrRos2Bridge;
 using RosMessageTypes.Geometry;
+using UnityEngine.InputSystem;
+using UnityEditor;
 
 /// <summary>
 ///
@@ -43,6 +45,10 @@ public class PublishControllerInfo : MonoBehaviour
             UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(desiredCharacteristics, controllers);
 
             List<ControllerInfoMsg> controllerInfoMsgs = new List<ControllerInfoMsg>();
+            if (controllers.Count == 0)
+            {
+                Debug.Log("No controllers found. Make sure they are on. Check the Steam VR Web Console to debug.");
+            }
 
             foreach (var device in controllers)
             {
@@ -56,26 +62,40 @@ public class PublishControllerInfo : MonoBehaviour
                 {
                     controllerSide = "Right";
                 }
-                string controllerObjectName = string.Format("{0} Controller Offset", controllerSide);
-                var controllerObject = GameObject.Find(controllerObjectName);
 
-                if (controllerObject == null)
-                {
-                    Debug.Log(string.Format("No such object {0}", controllerObjectName));
-                    continue;
-                }
+                // pose
+                Vector3 position;
+                Quaternion orientation;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out position);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceRotation, out orientation);
+
+                // twist
+                Vector3 linear_velocity;
+                Vector3 angular_velocity;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceVelocity, out linear_velocity);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceAngularVelocity, out angular_velocity);
 
                 var controllerInfoMsg = new ControllerInfoMsg();
                 controllerInfoMsg.controller_name = name;
 
-                // Get pose of the controller, and transform from a Y-up left-handed frame to a Z-up, X-forward, right handed frame
-                controllerInfoMsg.controller_pose.position.x = controllerObject.transform.position.x;
-                controllerInfoMsg.controller_pose.position.y = controllerObject.transform.position.z;
-                controllerInfoMsg.controller_pose.position.z = controllerObject.transform.position.y;
-                controllerInfoMsg.controller_pose.orientation.w = controllerObject.transform.rotation.w;
-                controllerInfoMsg.controller_pose.orientation.x = -controllerObject.transform.rotation.x;
-                controllerInfoMsg.controller_pose.orientation.y = -controllerObject.transform.rotation.z;
-                controllerInfoMsg.controller_pose.orientation.z = -controllerObject.transform.rotation.y;
+                // Rotate bu -90 about Y to make the +X axis forward
+                orientation *= Quaternion.Euler(0, -90, 0);
+
+                // Change from left to right handed coordinate frame. Swap Z and Y, and negate all rotations
+                controllerInfoMsg.controller_pose.position.x = position.x;
+                controllerInfoMsg.controller_pose.position.y = position.z;
+                controllerInfoMsg.controller_pose.position.z = position.y;
+                controllerInfoMsg.controller_pose.orientation.w = orientation.w;
+                controllerInfoMsg.controller_pose.orientation.x = -orientation.x;
+                controllerInfoMsg.controller_pose.orientation.y = -orientation.z;
+                controllerInfoMsg.controller_pose.orientation.z = -orientation.y;
+
+                controllerInfoMsg.controller_velocity.linear.x = linear_velocity.x;
+                controllerInfoMsg.controller_velocity.linear.y = linear_velocity.z;
+                controllerInfoMsg.controller_velocity.linear.z = linear_velocity.y;
+                controllerInfoMsg.controller_velocity.angular.x = -linear_velocity.x;
+                controllerInfoMsg.controller_velocity.angular.y = -linear_velocity.z;
+                controllerInfoMsg.controller_velocity.angular.z = -linear_velocity.y;
 
                 // For visualization in RViz
                 PoseStampedMsg pose_msg = new PoseStampedMsg();

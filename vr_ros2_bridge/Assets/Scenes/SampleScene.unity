@@ -1313,6 +1313,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topicName: vr_controller_info
+  frameName: vr
+  leftVelocityProperty:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Left Velocity Property
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 113a9318-97be-4100-8f9d-1f6996e6e4ed
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: -1061118099648980418, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   publishMessagePeriod: 0.016
 --- !u!4 &1906405709
 Transform:
