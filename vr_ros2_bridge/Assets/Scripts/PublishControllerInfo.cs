@@ -32,6 +32,8 @@ public class PublishControllerInfo : MonoBehaviour
         ros.RegisterPublisher<ControllersInfoMsg>(topicName, 10);
         ros.RegisterPublisher<PoseStampedMsg>("left_controller_pose", 10);
         ros.RegisterPublisher<PoseStampedMsg>("right_controller_pose", 10);
+        ros.RegisterPublisher<TwistStampedMsg>("left_controller_twist_stamped", 10);
+        ros.RegisterPublisher<TwistStampedMsg>("right_controller_twist_stamped", 10);
     }
 
     private void Update()
@@ -56,11 +58,11 @@ public class PublishControllerInfo : MonoBehaviour
                 string controllerSide;
                 if (isLeftController)
                 {
-                    controllerSide = "Left";
+                    controllerSide = "left";
                 }
                 else
                 {
-                    controllerSide = "Right";
+                    controllerSide = "right";
                 }
 
                 // pose
@@ -78,8 +80,11 @@ public class PublishControllerInfo : MonoBehaviour
                 var controllerInfoMsg = new ControllerInfoMsg();
                 controllerInfoMsg.controller_name = name;
 
-                // Rotate bu -90 about Y to make the +X axis forward
+                // Rotate by -90 about Y to make the +X axis forward
                 orientation *= Quaternion.Euler(0, -90, 0);
+                linear_velocity = Quaternion.Euler(0, -90, 0) * linear_velocity;
+                angular_velocity = Quaternion.Euler(0, -90, 0) * angular_velocity;
+
 
                 // Change from left to right handed coordinate frame. Swap Z and Y, and negate all rotations
                 controllerInfoMsg.controller_pose.position.x = position.x;
@@ -93,16 +98,22 @@ public class PublishControllerInfo : MonoBehaviour
                 controllerInfoMsg.controller_velocity.linear.x = linear_velocity.x;
                 controllerInfoMsg.controller_velocity.linear.y = linear_velocity.z;
                 controllerInfoMsg.controller_velocity.linear.z = linear_velocity.y;
-                controllerInfoMsg.controller_velocity.angular.x = -linear_velocity.x;
-                controllerInfoMsg.controller_velocity.angular.y = -linear_velocity.z;
-                controllerInfoMsg.controller_velocity.angular.z = -linear_velocity.y;
+                controllerInfoMsg.controller_velocity.angular.x = -angular_velocity.x;
+                controllerInfoMsg.controller_velocity.angular.y = -angular_velocity.z;
+                controllerInfoMsg.controller_velocity.angular.z = -angular_velocity.y;
 
                 // For visualization in RViz
-                PoseStampedMsg pose_msg = new PoseStampedMsg();
+                var pose_msg = new PoseStampedMsg();
                 pose_msg.header.frame_id = frameName;
                 pose_msg.pose = controllerInfoMsg.controller_pose;
-                var pose_topic_name = string.Format("{0}_controller_pose", controllerSide).ToLower();
+                var pose_topic_name = string.Format("{0}_controller_pose", controllerSide);
                 ros.Publish(pose_topic_name, pose_msg);
+
+                var twist_msg = new TwistStampedMsg();
+                twist_msg.header.frame_id = frameName; // TODO: what frame should this be in???
+                twist_msg.twist = controllerInfoMsg.controller_velocity;
+                var twist_topic_name = string.Format("{0}_controller_twist_stamped", controllerSide);
+                ros.Publish(twist_topic_name, twist_msg);
 
                 // Get button press states
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out controllerInfoMsg.trigger_button);
