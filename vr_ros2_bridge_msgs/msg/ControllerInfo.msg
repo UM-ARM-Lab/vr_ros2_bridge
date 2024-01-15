@@ -4,4 +4,7 @@ geometry_msgs/Twist controller_velocity
 bool trigger_button
 bool grip_button
 bool trackpad_button
+bool menu_button
+bool primary_button
+bool secondary_button
 float32 trigger_axis
