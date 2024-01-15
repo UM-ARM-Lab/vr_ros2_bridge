@@ -5,6 +5,7 @@ using RosMessageTypes.VrRos2Bridge;
 using RosMessageTypes.Geometry;
 using UnityEngine.InputSystem;
 using UnityEditor;
+using UnityEngine.XR;
 
 /// <summary>
 ///
@@ -14,6 +15,7 @@ public class PublishControllerInfo : MonoBehaviour
     ROSConnection ros;
     public string topicName = "vr_controller_info";
     public string frameName = "vr";
+    public bool debug_pub = false;
 
     // Controller Input Devices - used to access button states.
     List<UnityEngine.XR.InputDevice> controllers = new List<UnityEngine.XR.InputDevice>();
@@ -30,12 +32,15 @@ public class PublishControllerInfo : MonoBehaviour
         // start the ROS connection
         ros = ROSConnection.GetOrCreateInstance();
         ros.RegisterPublisher<ControllersInfoMsg>(topicName, 10);
-        ros.RegisterPublisher<PoseStampedMsg>("left_controller_pose", 10);
-        ros.RegisterPublisher<PoseStampedMsg>("right_controller_pose", 10);
-        ros.RegisterPublisher<TwistStampedMsg>("left_controller_twist_stamped", 10);
-        ros.RegisterPublisher<TwistStampedMsg>("right_controller_twist_stamped", 10);
-    }
+        if (debug_pub)
+        {
+            ros.RegisterPublisher<PoseStampedMsg>("left_controller_pose", 10);
+            ros.RegisterPublisher<PoseStampedMsg>("right_controller_pose", 10);
+            ros.RegisterPublisher<TwistStampedMsg>("left_controller_twist_stamped", 10);
+            ros.RegisterPublisher<TwistStampedMsg>("right_controller_twist_stamped", 10);
 
+        }
+    }
     private void Update()
     {
         timeElapsed += Time.deltaTime;
@@ -70,6 +75,13 @@ public class PublishControllerInfo : MonoBehaviour
                 Quaternion orientation;
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out position);
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceRotation, out orientation);
+                bool isTracked;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out isTracked);
+
+                if (!isTracked)
+                {
+                    continue;
+                }
 
                 // twist
                 Vector3 linear_velocity;
@@ -78,7 +90,7 @@ public class PublishControllerInfo : MonoBehaviour
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceAngularVelocity, out angular_velocity);
 
                 var controllerInfoMsg = new ControllerInfoMsg();
-                controllerInfoMsg.controller_name = name;
+                controllerInfoMsg.controller_name = device.name + " " + controllerSide;
 
                 // Rotate by -90 about Y to make the +X axis forward
                 orientation *= Quaternion.Euler(0, -90, 0);
@@ -107,13 +119,16 @@ public class PublishControllerInfo : MonoBehaviour
                 pose_msg.header.frame_id = frameName;
                 pose_msg.pose = controllerInfoMsg.controller_pose;
                 var pose_topic_name = string.Format("{0}_controller_pose", controllerSide);
-                ros.Publish(pose_topic_name, pose_msg);
 
                 var twist_msg = new TwistStampedMsg();
                 twist_msg.header.frame_id = frameName; // TODO: what frame should this be in???
                 twist_msg.twist = controllerInfoMsg.controller_velocity;
                 var twist_topic_name = string.Format("{0}_controller_twist_stamped", controllerSide);
-                ros.Publish(twist_topic_name, twist_msg);
+                if (debug_pub)
+                {
+                    ros.Publish(pose_topic_name, pose_msg);
+                    ros.Publish(twist_topic_name, twist_msg);
+                }
 
                 // Get button press states
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.triggerButton, out controllerInfoMsg.trigger_button);
