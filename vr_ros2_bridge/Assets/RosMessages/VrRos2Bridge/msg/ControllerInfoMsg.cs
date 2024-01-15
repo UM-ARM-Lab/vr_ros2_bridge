@@ -19,7 +19,14 @@ namespace RosMessageTypes.VrRos2Bridge
         public bool trigger_button;
         public bool grip_button;
         public bool trackpad_button;
+        public bool menu_button;
+        public bool primary_button;
+        public bool secondary_button;
         public float trigger_axis;
+        public float trackpad_axis_x;
+        public float trackpad_axis_y;
+        public float trackpad_axis_touch_x;
+        public float trackpad_axis_touch_y;
 
         public ControllerInfoMsg()
         {
@@ -29,10 +36,17 @@ namespace RosMessageTypes.VrRos2Bridge
             this.trigger_button = false;
             this.grip_button = false;
             this.trackpad_button = false;
+            this.menu_button = false;
+            this.primary_button = false;
+            this.secondary_button = false;
             this.trigger_axis = 0.0f;
+            this.trackpad_axis_x = 0.0f;
+            this.trackpad_axis_y = 0.0f;
+            this.trackpad_axis_touch_x = 0.0f;
+            this.trackpad_axis_touch_y = 0.0f;
         }
 
-        public ControllerInfoMsg(string controller_name, Geometry.PoseMsg controller_pose, Geometry.TwistMsg controller_velocity, bool trigger_button, bool grip_button, bool trackpad_button, float trigger_axis)
+        public ControllerInfoMsg(string controller_name, Geometry.PoseMsg controller_pose, Geometry.TwistMsg controller_velocity, bool trigger_button, bool grip_button, bool trackpad_button, bool menu_button, bool primary_button, bool secondary_button, float trigger_axis, float trackpad_axis_x, float trackpad_axis_y, float trackpad_axis_touch_x, float trackpad_axis_touch_y)
         {
             this.controller_name = controller_name;
             this.controller_pose = controller_pose;
@@ -40,7 +54,14 @@ namespace RosMessageTypes.VrRos2Bridge
             this.trigger_button = trigger_button;
             this.grip_button = grip_button;
             this.trackpad_button = trackpad_button;
+            this.menu_button = menu_button;
+            this.primary_button = primary_button;
+            this.secondary_button = secondary_button;
             this.trigger_axis = trigger_axis;
+            this.trackpad_axis_x = trackpad_axis_x;
+            this.trackpad_axis_y = trackpad_axis_y;
+            this.trackpad_axis_touch_x = trackpad_axis_touch_x;
+            this.trackpad_axis_touch_y = trackpad_axis_touch_y;
         }
 
         public static ControllerInfoMsg Deserialize(MessageDeserializer deserializer) => new ControllerInfoMsg(deserializer);
@@ -53,7 +74,14 @@ namespace RosMessageTypes.VrRos2Bridge
             deserializer.Read(out this.trigger_button);
             deserializer.Read(out this.grip_button);
             deserializer.Read(out this.trackpad_button);
+            deserializer.Read(out this.menu_button);
+            deserializer.Read(out this.primary_button);
+            deserializer.Read(out this.secondary_button);
             deserializer.Read(out this.trigger_axis);
+            deserializer.Read(out this.trackpad_axis_x);
+            deserializer.Read(out this.trackpad_axis_y);
+            deserializer.Read(out this.trackpad_axis_touch_x);
+            deserializer.Read(out this.trackpad_axis_touch_y);
         }
 
         public override void SerializeTo(MessageSerializer serializer)
@@ -64,7 +92,14 @@ namespace RosMessageTypes.VrRos2Bridge
             serializer.Write(this.trigger_button);
             serializer.Write(this.grip_button);
             serializer.Write(this.trackpad_button);
+            serializer.Write(this.menu_button);
+            serializer.Write(this.primary_button);
+            serializer.Write(this.secondary_button);
             serializer.Write(this.trigger_axis);
+            serializer.Write(this.trackpad_axis_x);
+            serializer.Write(this.trackpad_axis_y);
+            serializer.Write(this.trackpad_axis_touch_x);
+            serializer.Write(this.trackpad_axis_touch_y);
         }
 
         public override string ToString()
@@ -76,7 +111,14 @@ namespace RosMessageTypes.VrRos2Bridge
             "\ntrigger_button: " + trigger_button.ToString() +
             "\ngrip_button: " + grip_button.ToString() +
             "\ntrackpad_button: " + trackpad_button.ToString() +
-            "\ntrigger_axis: " + trigger_axis.ToString();
+            "\nmenu_button: " + menu_button.ToString() +
+            "\nprimary_button: " + primary_button.ToString() +
+            "\nsecondary_button: " + secondary_button.ToString() +
+            "\ntrigger_axis: " + trigger_axis.ToString() +
+            "\ntrackpad_axis_x: " + trackpad_axis_x.ToString() +
+            "\ntrackpad_axis_y: " + trackpad_axis_y.ToString() +
+            "\ntrackpad_axis_touch_x: " + trackpad_axis_touch_x.ToString() +
+            "\ntrackpad_axis_touch_y: " + trackpad_axis_touch_y.ToString();
         }
 
 #if UNITY_EDITOR

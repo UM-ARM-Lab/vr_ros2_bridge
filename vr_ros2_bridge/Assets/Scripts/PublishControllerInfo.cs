@@ -135,6 +135,19 @@ public class PublishControllerInfo : MonoBehaviour
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out controllerInfoMsg.trigger_axis);
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.gripButton, out controllerInfoMsg.grip_button);
                 device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxisClick, out controllerInfoMsg.trackpad_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.menuButton, out controllerInfoMsg.menu_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primaryButton, out controllerInfoMsg.primary_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out controllerInfoMsg.secondary_button);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.secondaryButton, out controllerInfoMsg.secondary_button);
+                var trackpad_axis = Vector2.zero;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out trackpad_axis);
+                controllerInfoMsg.trackpad_axis_x = trackpad_axis.x;
+                controllerInfoMsg.trackpad_axis_y = trackpad_axis.y;
+                var trackpad_axis_touch = Vector2.zero;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.primary2DAxis, out trackpad_axis_touch);
+                controllerInfoMsg.trackpad_axis_touch_x = trackpad_axis_touch.x;
+                controllerInfoMsg.trackpad_axis_touch_y = trackpad_axis_touch.y;
+
 
                 // Add to list of controller info messages.
                 controllerInfoMsgs.Add(controllerInfoMsg);

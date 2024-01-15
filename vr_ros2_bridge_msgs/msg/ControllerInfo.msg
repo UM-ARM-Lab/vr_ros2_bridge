@@ -8,3 +8,7 @@ bool menu_button
 bool primary_button
 bool secondary_button
 float32 trigger_axis
+float32 trackpad_axis_x
+float32 trackpad_axis_y
+float32 trackpad_axis_touch_x
+float32 trackpad_axis_touch_y
