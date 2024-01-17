@@ -1314,7 +1314,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   topicName: vr_controller_info
   frameName: vr
-  publishMessagePeriod: 0.001
+  debug_pub: 0
+  publishMessagePeriod: 0.01
 --- !u!4 &1906405709
 Transform:
   m_ObjectHideFlags: 0
