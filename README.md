@@ -6,6 +6,16 @@ Contents:
  - `vr_ros2_bridge` is a Unity project with a minimalistic VR setup, and a C# script called `PublishControllerInfo.cs` that reads from VR info from Unity and publishes via TCP. On the other end of the TCP connection is the C# ROS2 bridge, running on some Ubuntu machine that also has ROS 2 installed.
  - `vr_ros2_bridge_msgs` is a ROS 2 messages package that defines the custom message `ControllersInfo.msg` which is a list of `ControllerInfo.msg`, which contains pose and button statuses.
 
+# Windows Setup
+
+1. Ensure you have Unity Hub, Steam, and Steam VR Installed 
+1. Clone the repository containing the Unity project
+    ```
+    git clone git@github.com:/UM-ARM-Lab/vr_ros2_bridge.git
+    ```
+1. Open the project from the Unity Hub. The first time you do this, it will prompt you to install a specific version of the Unity Editor. It will also install the ROS-TCP-Connector package, OpenXR, and other dependencies. At this point you should be able to run the project (play button in the top center of the Unity Editor) you should see it run without errors. For something to actually happen, you need to start "Vive Console for Steam VR" and connect and power on the headset and controllers.
+
+
 # Ubuntu Setup
 
 In your ROS 2 colcon workspace, you'll need this repo and the ROS TCP Endpoint repo (`main-ros2` branch).
