@@ -28,6 +28,7 @@ git clone git@github.com:Unity-Technologies/ROS-TCP-Endpoint.git -b main-ros2
 # How to run
 
  - In Unity (on Windows), import and run ths `vr_ros2_bridge` project.
+ - Make sure in the "Hierarchy" pane on the left, you see "SampleScene". If not, go to "Assets > Scenes" in the "Project" pane and select "SampleScene".
  - In Unity, go to the top menu and click "Robtics" > "ROS Settings" and make sure you have "ROS 2" selected, and the IP address of the Ubuntu machine you want to communicate with.
  - In Ubuntu, 
  - In Ubuntu, start the C# ROS 2 bridge. See [this guide](https://github.com/Unity-Technologies/Unity-Robotics-Hub/blob/main/tutorials/ros_unity_integration/setup.md) for details. This essentially just requires running `ros2 run ros_tcp_endpoint default_server_endpoint --ros-args -p ROS_IP:=$ROS_IP`
