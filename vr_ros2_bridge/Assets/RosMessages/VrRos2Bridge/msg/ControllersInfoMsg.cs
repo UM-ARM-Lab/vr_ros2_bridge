@@ -14,18 +14,18 @@ namespace RosMessageTypes.VrRos2Bridge
         public override string RosMessageName => k_RosMessageName;
 
         public ControllerInfoMsg[] controllers_info;
-        public TrackerInfoMsg[] tracker_info;
+        public TrackerInfoMsg[] trackers_info;
 
         public ControllersInfoMsg()
         {
             this.controllers_info = new ControllerInfoMsg[0];
-            this.tracker_info = new TrackerInfoMsg[0];
+            this.trackers_info = new TrackerInfoMsg[0];
         }
 
-        public ControllersInfoMsg(ControllerInfoMsg[] controllers_info, TrackerInfoMsg[] tracker_info)
+        public ControllersInfoMsg(ControllerInfoMsg[] controllers_info, TrackerInfoMsg[] trackers_info)
         {
             this.controllers_info = controllers_info;
-            this.tracker_info = tracker_info;
+            this.trackers_info = trackers_info;
         }
 
         public static ControllersInfoMsg Deserialize(MessageDeserializer deserializer) => new ControllersInfoMsg(deserializer);
@@ -33,22 +33,22 @@ namespace RosMessageTypes.VrRos2Bridge
         private ControllersInfoMsg(MessageDeserializer deserializer)
         {
             deserializer.Read(out this.controllers_info, ControllerInfoMsg.Deserialize, deserializer.ReadLength());
-            deserializer.Read(out this.tracker_info, TrackerInfoMsg.Deserialize, deserializer.ReadLength());
+            deserializer.Read(out this.trackers_info, TrackerInfoMsg.Deserialize, deserializer.ReadLength());
         }
 
         public override void SerializeTo(MessageSerializer serializer)
         {
             serializer.WriteLength(this.controllers_info);
             serializer.Write(this.controllers_info);
-            serializer.WriteLength(this.tracker_info);
-            serializer.Write(this.tracker_info);
+            serializer.WriteLength(this.trackers_info);
+            serializer.Write(this.trackers_info);
         }
 
         public override string ToString()
         {
             return "ControllersInfoMsg: " +
             "\ncontrollers_info: " + System.String.Join(", ", controllers_info.ToList()) +
-            "\ntracker_info: " + System.String.Join(", ", tracker_info.ToList());
+            "\ntrackers_info: " + System.String.Join(", ", trackers_info.ToList());
         }
 
 #if UNITY_EDITOR

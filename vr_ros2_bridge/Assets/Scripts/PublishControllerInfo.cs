@@ -6,10 +6,12 @@ using RosMessageTypes.Geometry;
 using UnityEngine.InputSystem;
 using UnityEditor;
 using UnityEngine.XR;
+using static UnityEngine.XR.OpenXR.Features.Interactions.HTCViveTrackerProfile;
+using UnityEngine.XR.OpenXR.Features.Interactions;
+using System.Linq;
+using System;
 
-/// <summary>
-///
-/// </summary>
+
 public class PublishControllerInfo : MonoBehaviour
 {
     ROSConnection ros;
@@ -36,11 +38,25 @@ public class PublishControllerInfo : MonoBehaviour
         {
             ros.RegisterPublisher<PoseStampedMsg>("left_controller_pose", 10);
             ros.RegisterPublisher<PoseStampedMsg>("right_controller_pose", 10);
+            ros.RegisterPublisher<PoseStampedMsg>("tracker_pose", 10);
             ros.RegisterPublisher<TwistStampedMsg>("left_controller_twist_stamped", 10);
             ros.RegisterPublisher<TwistStampedMsg>("right_controller_twist_stamped", 10);
 
         }
     }
+
+    bool isTracker(UnityEngine.XR.InputDevice device)
+    {
+        foreach (var trackerChar in Enum.GetValues(typeof(HTCViveTrackerProfile.InputDeviceTrackerCharacteristics)))
+        {
+            if ((device.characteristics & (InputDeviceCharacteristics)trackerChar) != 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void Update()
     {
         timeElapsed += Time.deltaTime;
@@ -48,14 +64,22 @@ public class PublishControllerInfo : MonoBehaviour
         {
             ControllersInfoMsg controllersInfoMsg = new ControllersInfoMsg();
 
+            List<UnityEngine.XR.InputDevice> all_devices = new List<UnityEngine.XR.InputDevice>();
+            UnityEngine.XR.InputDevices.GetDevices(all_devices);
             List<UnityEngine.XR.InputDevice> trackers = new List<UnityEngine.XR.InputDevice>();
-            var trackerCharacteristics = UnityEngine.XR.InputDeviceCharacteristics.TrackedDevice;
-            UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(trackerCharacteristics, trackers);
+            foreach (var device in all_devices)
+            {
+                if (isTracker(device))
+                {
+                    trackers.Add(device);
+                }
+            }
 
             var controllerCharacteristics = UnityEngine.XR.InputDeviceCharacteristics.Controller;
             UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(controllerCharacteristics, controllers);
 
             List<ControllerInfoMsg> controllerInfoMsgs = new List<ControllerInfoMsg>();
+            List<TrackerInfoMsg> trackerInfoMsgs = new List<TrackerInfoMsg>();
             if (controllers.Count == 0)
             {
                 Debug.Log("No controllers found. Make sure they are on. Check the Steam VR Web Console to debug.");
@@ -157,8 +181,54 @@ public class PublishControllerInfo : MonoBehaviour
                 controllerInfoMsgs.Add(controllerInfoMsg);
             }
 
+            foreach (var device in trackers)
+            {
+                Vector3 position;
+                Quaternion orientation;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out position);
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.deviceRotation, out orientation);
+
+                // make Z up
+                orientation *= Quaternion.Euler(90, 0, 0);
+
+                bool isTracked;
+                device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.isTracked, out isTracked);
+                if (!isTracked)
+                {
+                    continue;
+                }
+
+                var trackerInfoMsg = new TrackerInfoMsg();
+                trackerInfoMsg.tracker_name = device.name;
+
+
+                // Change from left to right handed coordinate frame. Swap Z and Y, and negate all rotations
+                trackerInfoMsg.tracker_pose.position.x = position.x;
+                trackerInfoMsg.tracker_pose.position.y = position.z;
+                trackerInfoMsg.tracker_pose.position.z = position.y;
+                trackerInfoMsg.tracker_pose.orientation.w = orientation.w;
+                trackerInfoMsg.tracker_pose.orientation.x = -orientation.x;
+                trackerInfoMsg.tracker_pose.orientation.y = -orientation.z;
+                trackerInfoMsg.tracker_pose.orientation.z = -orientation.y;
+
+                // For visualization in RViz
+                var pose_msg = new PoseStampedMsg();
+                pose_msg.header.frame_id = frameName;
+                pose_msg.pose = trackerInfoMsg.tracker_pose;
+
+                if (debug_pub)
+                {
+                    ros.Publish("tracker_pose", pose_msg);
+                }
+
+
+                // Add to list of controller info messages.
+                trackerInfoMsgs.Add(trackerInfoMsg);
+            }
+
             // Populate controllers info msg.
             controllersInfoMsg.controllers_info = controllerInfoMsgs.ToArray();
+            controllersInfoMsg.trackers_info = trackerInfoMsgs.ToArray();
 
             // Finally send the message to server_endpoint.py running in ROS
             ros.Publish(topicName, controllersInfoMsg);
