@@ -48,8 +48,12 @@ public class PublishControllerInfo : MonoBehaviour
         {
             ControllersInfoMsg controllersInfoMsg = new ControllersInfoMsg();
 
-            var desiredCharacteristics = UnityEngine.XR.InputDeviceCharacteristics.Controller;
-            UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(desiredCharacteristics, controllers);
+            List<UnityEngine.XR.InputDevice> trackers = new List<UnityEngine.XR.InputDevice>();
+            var trackerCharacteristics = UnityEngine.XR.InputDeviceCharacteristics.TrackedDevice;
+            UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(trackerCharacteristics, trackers);
+
+            var controllerCharacteristics = UnityEngine.XR.InputDeviceCharacteristics.Controller;
+            UnityEngine.XR.InputDevices.GetDevicesWithCharacteristics(controllerCharacteristics, controllers);
 
             List<ControllerInfoMsg> controllerInfoMsgs = new List<ControllerInfoMsg>();
             if (controllers.Count == 0)

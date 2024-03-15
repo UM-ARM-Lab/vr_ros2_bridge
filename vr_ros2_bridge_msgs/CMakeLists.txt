@@ -12,6 +12,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ControllerInfo.msg"
+  "msg/TrackerInfo.msg"
   "msg/ControllersInfo.msg"
   DEPENDENCIES geometry_msgs
 )
